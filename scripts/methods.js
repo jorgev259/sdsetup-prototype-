@@ -86,7 +86,8 @@ function downloader() {
         xhr.send();
     };
 
-    t.getLatestRelease = function(author,repo,filename,step){
+    // TODO: receive an object as argument
+    t.getLatestRelease = function(author, repo, filename, step){
         if(rate_limit) return;
 
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/latest", function( data ) {
@@ -103,7 +104,8 @@ function downloader() {
         });
     };
 
-    t.getRelease = function(author,repo,filename,release,step) {
+    // TODO: receive an object as argument
+    t.getRelease = function(author, repo, filename, release, step) {
         if(rate_limit) return;
         
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/tags/" + release, function( data ) {
@@ -120,7 +122,8 @@ function downloader() {
         });
     };
 
-    t.getRelease = function(author,repo,filename,release,step){
+    // TODO: receive an object as argument
+    t.getRelease = function(author, repo, filename, release, step){
         if(rate_limit) return;
 
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/tags/" + release, function( data ) {
@@ -137,7 +140,8 @@ function downloader() {
         });
     };
 
-    t.notLatestRelease = function(author,repo,filename,step){
+    // TODO: receive an object as argument
+    t.notLatestRelease = function(author, repo, filename, step){
         if(rate_limit) return;
 
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases", function( data ) {
@@ -153,7 +157,8 @@ function downloader() {
         });
     };
 
-    function getFileBuffer_zip(bufferName,original_name,new_name,path){    
+    // TODO: receive an object as argument
+    function getFileBuffer_zip(bufferName, original_name, new_name, path){    
         if(bufferList[bufferName] == undefined){        
             setTimeout(function(){ getFileBuffer_zip(bufferName,original_name,new_name,path)},500);
         } else {
@@ -165,36 +170,37 @@ function downloader() {
         }
     }
 
-    function extractFolder(bufferName,folder,path){    
+    function extractFolder(bufferName, folder, path){    
         if(bufferList[bufferName] == undefined){      
             setTimeout(function(){ extractFolder(bufferName,folder,path)},500);
-        } else {   
-            var data =  bufferList[bufferName]
-            var file_count2 = 0;
+            return;
+        }
+
+        var data =  bufferList[bufferName]
+        var file_count2 = 0;
+        
+        //Modified from @jkcgs's snippet from extractZip :3
+        Object.keys(data.files).forEach(function(filename){
+            var file = data.files[filename];
+            if (file.dir || !filename.startsWith(folder)) {
+                file_count2++;
+                return;
+            }
             
-            //Modified from @jkcgs's snippet from extractZip :3
-            Object.keys(data.files).forEach(function(filename){
-                var file = data.files[filename];
-                if (file.dir || !filename.startsWith(folder)) {
-                    file_count2++;
-                    return;
+            file.async("arraybuffer").then(function(content) {
+                file_count2++;
+                addFile(content, path, filename, "buffer");
+
+                if(file_count2 == Object.keys(data.files).length){
+                    progress_finish(bufferName, bufferName + ": Added to Zip");
+                    
                 }
                 
-                file.async("arraybuffer").then(function(content) {
-                    file_count2++;
-                    addFile(content, path, filename, "buffer");
-
-                    if(file_count2 == Object.keys(data.files).length){
-                        progress_finish(bufferName, bufferName + ": Added to Zip");
-                        
-                    }
-                    
-                });
             });
-        }
+        });
     }
 
-    function extractZip(bufferName,path,remove_path){
+    function extractZip(bufferName, path, remove_path){
         if(bufferList[bufferName] == undefined || delete_zip[bufferName] == true) {
             setTimeout(function(){ 
                 extractZip(bufferName,path,remove_path);

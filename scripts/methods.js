@@ -1,23 +1,28 @@
-(new downloader()).init();
+(function(d) {
+    init(); // more magic
 
-function downloader() {
-    var t = this;
-    var bufferList = new Object();
-    var delete_zip = new Object();
+    //////////////////////
+
+    var bufferList = {};
+    var delete_zip = {};
     var finalZip = new JSZip();
     var available = false;
     var rate_limit = false;
+    var waiting = false;
 
-    t.init = function() {
-        $.get("./setup_steps.json", start_setup);
+    function init() {
+        startSetup();
         $('.dl-button').click(function() {
-            t.downloadZip();
+            if(!waiting) {
+                downloadZip();
+                waiting = true;
+            }
         });
-    };
+    }
 
-    t.downloadZip = function() {
+    function downloadZip() {
         if(!available) {
-            setTimeout(downloadZip(),500);
+            setTimeout(downloadZip(), 500);
             return;
         }
 
@@ -27,67 +32,76 @@ function downloader() {
         });
     }
 
-    t.start_setup = function(data) {
-        var list = JSON.parse(data);
-        var element_list = $("#whatyouneed").children();
-        
-        for(var i=0; i<element_list.length; i++){
-            var step_name = $(element_list[i]).data().name;      
-            var step = list[step_name];
-            
-            evaluate_step(step.type,step,step_name);
-        }
-    };
+    function startSetup(data) {
+        $.get("data/setup_steps.json", function(list) {
+            d.querySelectorAll("[data-name]").forEach(function(element) {
+                console.log(element);
+                var stepName = element.dataset.name;
+                if(stepName && list.hasOwnProperty(stepName)) {
+                    var step = list[stepName];
+                    evaluateStep(step.type, step, stepName);
+                }
+            });
+        });
+    }
 
-    t.evaluate_step = function(step, step_data, step_name) {
+    function evaluateStep(step, step_data, step_name) {
         switch(step){
             case "latest":
                 getLatestRelease(step_data.author, step_data.repo, step_data.file, step_name);
-                evaluate_step(step_data.step, step_data, step_name);
+                evaluateStep(step_data.step, step_data, step_name);
                 break;
                 
             case "extractFile":                     
                 getFileBuffer_zip(step_name, step_data.fileExtract, step_data.new_name, step_data.path);
                 break;
         }
-    };
+    }
 
-    t.getFileBuffer_url = function(url, name) {
-        var ends_zip = url.endsWith('.zip');
-        
+    function getFileBuffer_url(url, name) {
+        console.log("Downloading " + url);
         available = false;
+
+        var ends_zip = url.endsWith('.zip');
+
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url);
         xhr.responseType = "arraybuffer";
+
+        xhr.onload = function () {
+            if(this.status !== 200) {
+                console.log(this.status);
+                return;
+            }
+
+            var fileBlob = new Blob([xhr.response]);
+            var fileReader = new FileReader();
+
+            fileReader.onload = function() {
+                if(ends_zip){
+                    JSZip.loadAsync(this.result).then(function (data) {
+                        bufferList[name] = data;
+                    });
+                } else {
+                    bufferList[name] = this.result;
+                }
+            };
+            fileReader.readAsArrayBuffer(fileBlob);
+            available = true;
+        };
+
         xhr.onerror = function(){
             console.log(this.status);
             getFileBuffer_url(url,name);
         };
-        xhr.onload = function () {
-            var fileBlob = new Blob([xhr.response]);
-            
-            if (this.status === 200) {
-                var fileReader = new FileReader();
-                fileReader.onload = function() {
-                    if(ends_zip){
-                        JSZip.loadAsync(this.result).then(function (data) {
-                            bufferList[name] = data;
-                        })
-                    }else{
-                        bufferList[name] = this.result;
-                    }
-                };
-                fileReader.readAsArrayBuffer(fileBlob);
-                available = true;
-            }else{
-                console.log(this.status);
-            }
-        };
+
         xhr.send();
-    };
+    }
+
+    // TODO: Merge github methods
 
     // TODO: receive an object as argument
-    t.getLatestRelease = function(author, repo, filename, step){
+    function getLatestRelease(author, repo, filename, step){
         if(rate_limit) return;
 
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/latest", function( data ) {
@@ -95,17 +109,17 @@ function downloader() {
                 var file = data.assets[key];
 
                 if(file.name.indexOf(filename) > -1){
-                    getFileBuffer_url(cursURL(file.browser_download_url), step);
+                    getFileBuffer_url(corsURL(file.browser_download_url), step);
                     return;
                 }
             })
         }).fail(function(jqXHR) {
             rateLimit(jqXHR);
         });
-    };
+    }
 
     // TODO: receive an object as argument
-    t.getRelease = function(author, repo, filename, release, step) {
+    function getRelease(author, repo, filename, release, step) {
         if(rate_limit) return;
         
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/tags/" + release, function( data ) {
@@ -120,28 +134,10 @@ function downloader() {
         }).fail(function(jqXHR) {
             rateLimit(jqXHR);
         });
-    };
+    }
 
     // TODO: receive an object as argument
-    t.getRelease = function(author, repo, filename, release, step){
-        if(rate_limit) return;
-
-        $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/tags/" + release, function( data ) {
-            Object.keys(data.assets).forEach(function(key){
-                var file = data.assets[key];
-
-                if(file.name.indexOf(filename) > -1){
-                    getFileBuffer_url(corsURL(file.browser_download_url), step);
-                    return;
-                }
-            })
-        }).fail(function(jqXHR) {
-            rateLimit(jqXHR);
-        });
-    };
-
-    // TODO: receive an object as argument
-    t.notLatestRelease = function(author, repo, filename, step){
+    function notLatestRelease(author, repo, filename, step){
         if(rate_limit) return;
 
         $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases", function( data ) {
@@ -155,7 +151,7 @@ function downloader() {
         }).fail(function(jqXHR) {
             rateLimit(jqXHR);
         });
-    };
+    }
 
     // TODO: receive an object as argument
     function getFileBuffer_zip(bufferName, original_name, new_name, path){    
@@ -286,4 +282,4 @@ function downloader() {
     function corsURL(url) {
         return "https://cors-anywhere.herokuapp.com/" + url;
     }
-} // downloader
+})(document); // downloader

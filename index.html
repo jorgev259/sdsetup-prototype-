@@ -2,20 +2,30 @@
 <head>
     <title>it's magic!</title>
     <meta charset="utf-8" />
+    <style>
+        html {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        img {
+            height: 28px;
+            vertical-align: sub;
+        }
+    </style>
 </head>
 <body>
+    <h2>Magic <img src="https://emojipedia-us.s3.amazonaws.com/cache/29/37/293793f686aabd86a17a5e4e6c4e90dc.png" /></h2>
     <ul id="whatyouneed">
-        <li data-name="luma"><a>* The latest release of [Luma3DS]</a></li>
-        <li data-name="SafeB9SInstaller_payload"><a>* The latest release of [SafeB9SInstaller]</a></li>
-        <!--<li data-name="boot9strap"><a>* The latest release of [boot9strap]</a></li>
-        <li data-name="GodMode9"><a>* The latest release of [GodMode9]</a></li>
-        <li data-name="Luma3DS Updater"><a>* The latest fork of [Luma3DS Updater]</a></li>-->
+        <li><a href="javascript:" data-name="luma">The latest release of <b>Luma3DS</b></a></li>
+        <li><a href="javascript:" data-name="SafeB9SInstaller_payload">The latest release of <b>SafeB9SInstaller</b></a></li>
+        <li><a href="javascript:" data-name="boot9strap">The latest release of <b>boot9strap</b></a></li>
+        <li><a href="javascript:" data-name="GodMode9">The latest release of <b>GodMode9</b></a></li>
+        <li><a href="javascript:" data-name="Luma3DS Updater">The latest fork of <b>Luma3DS Updater</b></a></li>
     </ul>
     <button class="dl-button">Download</button>
 
-    <script src="jquery.js"></script>
-    <script src="jszip.js"></script>
-    <script src="FileSaver.js"></script>
-    <script src="methods.js"></script>
+    <script src="scripts/jquery.js"></script>
+    <script src="scripts/jszip.js"></script>
+    <script src="scripts/FileSaver.js"></script>
+    <script src="scripts/methods.js"></script>
 </body>
 </html>

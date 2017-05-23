@@ -1,7 +1,6 @@
 $(document).ready(function(){
     $.ajax({
         url: "./setup_steps",
-        async: false,
         success: function (data){
             start_setup(data);
         }
@@ -16,10 +15,15 @@ function start_setup(data){
         var step_name = $(element_list[i]).data().name;      
         var step = list[step_name];
         
-        switch(step.type){
-            case "latest":
-                getLatestRelease(step.author,step.repo,step.file,step_name);
-                break;
-        }
+        evaluate_step(step.type,step,step_name);
+    }
+}
+
+function evaluate_step(step,step_data,step_name){
+    switch(step){
+        case "latest":
+            getLatestRelease(step.author,step.repo,step.file,step_name);
+            evaluate_step()
+            break;
     }
 }

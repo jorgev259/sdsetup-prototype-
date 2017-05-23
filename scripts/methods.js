@@ -22,7 +22,7 @@
 
     function downloadZip() {
         if(!available) {
-            setTimeout(downloadZip(), 500);
+            setTimeout(downloadZip, 500);
             return;
         }
 
@@ -33,29 +33,85 @@
     }
 
     function startSetup(data) {
-        $.get("data/setup_steps.json", function(list) {
+        $.get("data/setup.json", function(list) {
             d.querySelectorAll("[data-name]").forEach(function(element) {
-                console.log(element);
-                var stepName = element.dataset.name;
-                if(stepName && list.hasOwnProperty(stepName)) {
-                    var step = list[stepName];
-                    evaluateStep(step.type, step, stepName);
+                var itemName = element.dataset.name;
+                if(itemName && list.hasOwnProperty(itemName)) {
+                    evaluateItem(list[itemName]);
                 }
             });
         });
     }
 
-    function evaluateStep(step, step_data, step_name) {
-        switch(step){
-            case "latest":
-                getLatestRelease(step_data.author, step_data.repo, step_data.file, step_name);
-                evaluateStep(step_data.step, step_data, step_name);
-                break;
-                
-            case "extractFile":                     
-                getFileBuffer_zip(step_name, step_data.fileExtract, step_data.new_name, step_data.path);
+    function evaluateItem(item) {
+        switch(item.type) {
+            case "github":
+                getGithubRelease(item, function(err, data) {
+                    if(err) {
+                        console.error(err);
+                        return;
+                    }
+
+                    runGithubSteps(data, item.steps);
+                });
                 break;
         }
+    }
+
+    function runGithubSteps(data, steps) {
+        Object.keys(data.assets).forEach(function(key){
+            var file = data.assets[key];
+
+            if(file.name.indexOf(data.file) > -1){
+                getFileBuffer_url(corsURL(file.browser_download_url), steps[0]);
+                return;
+            }
+        });
+    }
+
+    function evaluateStep(step) {
+        switch(step.type){
+            case "extractFile":                     
+                getFileBuffer_zip(step.name, step.fileExtract, step.new_name, step.path);
+                break;
+        }
+    }
+
+    function getGithubRelease(options, callback) {
+        if(rate_limit) {
+            callback(new Error("Rate limited lol"));
+            return;
+        }
+
+        callback = callback || function(){};
+        var defaults = {
+            author: "",
+            repo: "",
+            version: "latest"
+        };
+
+        options = $.extend(defaults, options);
+        if(!options.author || !options.repo) {
+            callback(new Error("Author and repo names required"), null);
+            return;
+        }
+
+        var url = "https://api.github.com/repos/" + options.author + "/" + options.repo + "/releases";
+        if(options.version === "latest") {
+            url += "/latest";
+        } else if(options.version !== "") {
+            url += "/tags/" + options.version;
+        }
+
+        $.getJSON(url, function(data) {
+            if(options.version === "") {
+                data = data[0];
+            }
+
+            callback(null, data);
+        }).fail(function(jqXHR) {
+            rateLimit(jqXHR);
+        });
     }
 
     function getFileBuffer_url(url, name) {
@@ -98,62 +154,6 @@
         xhr.send();
     }
 
-    // TODO: Merge github methods
-
-    // TODO: receive an object as argument
-    function getLatestRelease(author, repo, filename, step){
-        if(rate_limit) return;
-
-        $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/latest", function( data ) {
-            Object.keys(data.assets).forEach(function(key){
-                var file = data.assets[key];
-
-                if(file.name.indexOf(filename) > -1){
-                    getFileBuffer_url(corsURL(file.browser_download_url), step);
-                    return;
-                }
-            })
-        }).fail(function(jqXHR) {
-            rateLimit(jqXHR);
-        });
-    }
-
-    // TODO: receive an object as argument
-    function getRelease(author, repo, filename, release, step) {
-        if(rate_limit) return;
-        
-        $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases/tags/" + release, function( data ) {
-            Object.keys(data.assets).forEach(function(key){
-                var file = data.assets[key];
-
-                if(file.name.indexOf(filename) > -1){
-                    getFileBuffer_url(corsURL(file.browser_download_url), step);
-                    return;
-                }
-            })
-        }).fail(function(jqXHR) {
-            rateLimit(jqXHR);
-        });
-    }
-
-    // TODO: receive an object as argument
-    function notLatestRelease(author, repo, filename, step){
-        if(rate_limit) return;
-
-        $.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/releases", function( data ) {
-        var data = data[0];  Object.keys(data.assets).forEach(function(key){
-                var file = data.assets[key];
-
-                if(file.name.indexOf(filename) > -1){
-                    getFileBuffer_url(corsURL(file.browser_download_url), step);
-                }
-            })
-        }).fail(function(jqXHR) {
-            rateLimit(jqXHR);
-        });
-    }
-
-    // TODO: receive an object as argument
     function getFileBuffer_zip(bufferName, original_name, new_name, path){    
         if(bufferList[bufferName] == undefined){        
             setTimeout(function(){ getFileBuffer_zip(bufferName,original_name,new_name,path)},500);
@@ -272,10 +272,8 @@
         }
         
         $.getJSON("http://api.github.com/rate_limit", function(data){
-            var reset = Date(data.rate.reset * 1000);
-            if(!rate_limit){
-                rate_limit = true;
-            }
+            //var reset = Date(data.rate.reset * 1000);
+            rate_limit = data.rate.remaining === 0;
         });
     }
 

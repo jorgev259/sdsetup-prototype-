@@ -17,8 +17,8 @@ function start_setup(data){
 function evaluate_step(step,step_data,step_name){
     switch(step){
         case "latest":
-            getLatestRelease(step.author,step.repo,step.file,step_name);
-            evaluate_step(step.step,step,step_name);
+            getLatestRelease(step_data.author,step_data.repo,step_data.file,step_name);
+            evaluate_step(step_data.step,step_data,step_name);
             break;
     }
 }

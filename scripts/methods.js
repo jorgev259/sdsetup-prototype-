@@ -59,19 +59,24 @@
     }
 
     function runGithubSteps(data, steps) {
-        Object.keys(data.assets).forEach(function(key){
-            var file = data.assets[key];
+        steps.forEach(function(step) {
+            evaluateStep(step);
 
-            if(file.name.indexOf(data.file) > -1){
-                getFileBuffer_url(corsURL(file.browser_download_url), steps[0]);
-                return;
-            }
+            Object.keys(data.assets).forEach(function(key){
+                var file = data.assets[key];
+
+                if(file.name.indexOf(step.file) > -1){
+                    getFileBuffer_url(corsURL(file.browser_download_url), step);
+                    return;
+                }
+            });
         });
     }
 
     function evaluateStep(step) {
         switch(step.type){
-            case "extractFile":                     
+            case "extractFile":
+                console.log("extractFile step");
                 getFileBuffer_zip(step.name, step.fileExtract, step.new_name, step.path);
                 break;
         }

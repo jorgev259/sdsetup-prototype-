@@ -1,0 +1,11 @@
+{
+    {
+        name:'SafeB9SInstaller',
+        author:'d0k3',
+        type:'latest',
+        step:'extractFile',
+        file:'SafeB9SInstaller.bin',
+        new_name:'start_SafeB9SInstaller.bin',
+        path:'luma/payloads'
+    }
+}

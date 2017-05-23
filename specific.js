@@ -20,5 +20,20 @@ function evaluate_step(step,step_data,step_name){
             getLatestRelease(step_data.author,step_data.repo,step_data.file,step_name);
             evaluate_step(step_data.step,step_data,step_name);
             break;
+            
+        case "extractFile":                     
+            getFileBuffer_zip(step_name,step_data.fileExtract,step_data.new_name,step_data.path);
+            break;
     }
 }
+
+/*"SafeB9SInstaller_payload":{
+        "repo":"SafeB9SInstaller",
+        "author":"d0k3",
+        "type":"latest",
+        "step":"extractFile",
+        "file":".zip",
+        "fileExtract":"SafeB9SInstaller.bin",
+        "new_name":"start_SafeB9SInstaller.bin",
+        "path":"luma/payloads"
+    },*/

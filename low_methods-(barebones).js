@@ -91,7 +91,8 @@ function notLatestRelease(author,repo,filename,step){
 function getFileBuffer_zip(bufferName,original_name,new_name,path){    
     if(bufferList[bufferName] == undefined){        
         setTimeout(function(){ getFileBuffer_zip(bufferName,original_name,new_name,path)},500);
-    }else{   
+    }else{
+        if(new_name == undefined || new_name == ""){new_name = original_name};
         var data =  bufferList[bufferName]    
             data.file(original_name).async("arraybuffer").then(function success(content){
                 addFile(content,path,new_name,"buffer");               
@@ -216,18 +217,4 @@ function downloadZip(){
     }else{
         setTimeout(downloadZip(),500);
     }
-}
-
-//This is a real working example
-function bootstrap9_browser(){
-    getFileBuffer_url("https://smealum.github.io/ninjhax2/starter.zip","Starter Homebrew Kit");
-    extractZip("Starter Homebrew Kit","","starter");
-    
-    getLatestRelease("SciresM","boot9strap",".zip", "boot9strap");
-    extractZip("boot9strap","boot9strap","");
-    
-    getLatestRelease("d0k3","SafeB9SInstaller",".zip", "SafeB9SInstaller");
-    getFileBuffer_zip("SafeB9SInstaller","SafeB9SInstaller.bin","safehaxpayload.bin","");
-    
-    downloadZip();
 }

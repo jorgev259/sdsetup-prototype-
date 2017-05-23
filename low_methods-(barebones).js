@@ -2,6 +2,7 @@ var bufferList = new Object();
 var delete_zip = new Object();
 var finalZip = new JSZip();
 var available = false;
+var rate_limit= false;
 
 function getFileBuffer_url(url, name) {
     var ends_zip = url.endsWith('.zip');

@@ -9,8 +9,17 @@ $(document).ready(function(){
 })
 
 function start_setup(data){
-    console.log(JSON.parse(data));
-    var list = $("#whatyouneed").children();
-    console.log(list);
-    console.log(list[0].dataset);
+    var list = JSON.parse(data);
+    var element_list = $("#whatyouneed").children();
+    
+    for(var i=0;i<element_list.length;i++){
+        var step_name = $(element_list[i]).data().name;      
+        var step = list[step_name];
+        
+        switch(step.type){
+            case "latest":
+                getLatestRelease(step.author,step.repo,step.file,step_name);
+                break;
+        }
+    }
 }

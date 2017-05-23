@@ -1,18 +1,22 @@
 {
-    "SafeB9SInstaller":{
+    "SafeB9SInstaller_payload":{
+        "repo":"SafeB9SInstaller",
         "author":"d0k3",
         "type":"latest",
         "step":"extractFile",
-        "file":"SafeB9SInstaller.bin",
+        "file":".zip",
+        "fileExtract":"SafeB9SInstaller.bin",
         "new_name":"start_SafeB9SInstaller.bin",
         "path":"luma/payloads"
     },
     
-    "Luma3DS":{
+    "luma":{
+        "repo":"Luma3DS",
         "author":"AuroraWright",
         "type":"latest",
         "step":"extractFile",
-        "file":"boot.firm",
+        "file":".7z",
+        "fileExtract":"boot.firm",
         "path":""
     }
 }

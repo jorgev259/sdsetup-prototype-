@@ -1,10 +1,5 @@
 $(document).ready(function(){
-    $.ajax({
-        url: "./setup_steps",
-        success: function (data){
-            start_setup(data);
-        }
-    });  
+    $.get("./setup_steps",function (data){start_setup(data);});
 })
 
 function start_setup(data){
@@ -23,7 +18,7 @@ function evaluate_step(step,step_data,step_name){
     switch(step){
         case "latest":
             getLatestRelease(step.author,step.repo,step.file,step_name);
-            evaluate_step()
+            evaluate_step(step.step,step,step_name);
             break;
     }
 }

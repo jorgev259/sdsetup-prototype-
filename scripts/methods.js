@@ -252,7 +252,7 @@
     }
 
     function rateLimit() {        
-        $.getJSON("http://api.github.com/rate_limit", function(data){
+        $.getJSON("https://api.github.com/rate_limit", function(data){
             //var reset = Date(data.rate.reset * 1000);
             rate_limit = data.rate.remaining === 0;
         });

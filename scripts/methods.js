@@ -3,7 +3,6 @@
 
     //////////////////////
 
-    var bufferList = {};
     var delete_zip = {};
     var finalZip = new JSZip();
     var available = false;
@@ -46,49 +45,45 @@
     function evaluateItem(item) {
         switch(item.type) {
             case "github":
-                getGithubRelease(item, function(err, data) {
-                    if(err) {
-                        console.error(err);
-                        return;
-                    }
-
-                    runGithubSteps(data, item.steps);
-                });
+                runGithub(item);
+                break;
+            case "direct":
+                // lel
                 break;
         }
     }
 
-    function runGithubSteps(data, steps) {
-        steps.forEach(function(step) {
-            evaluateStep(step);
+    function evaluateStep(step, data) {
+        switch(step.type){
+            case "extractFile":
+                getFileBuffer_zip(data, step.fileExtract, step.newName, step.path);
+                break;
+            // add more
+        }
+    }
 
-            Object.keys(data.assets).forEach(function(key){
-                var file = data.assets[key];
+    // Prepares files and runs each step passing the downloaded files.
+    function runGithub(item) {
+        getGithubRelease(item, function(err, info) {
+            item.steps.forEach(function(step) {
+                var asset = getGithubAsset(info.assets, step.file);
+                if(asset === null) return;
 
-                if(file.name.indexOf(step.file) > -1){
-                    getFileBuffer_url(corsURL(file.browser_download_url), step);
-                    return;
-                }
+                getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
+                    evaluateStep(step, data);
+                });
             });
         });
     }
 
-    function evaluateStep(step) {
-        switch(step.type){
-            case "extractFile":
-                console.log("extractFile step");
-                getFileBuffer_zip(step.name, step.fileExtract, step.new_name, step.path);
-                break;
-        }
-    }
-
     function getGithubRelease(options, callback) {
+        callback = callback || function(){};
+
         if(rate_limit) {
-            callback(new Error("Rate limited lol"));
+            callback(new Error("Rate limited lol :p"));
             return;
         }
 
-        callback = callback || function(){};
         var defaults = {
             author: "",
             repo: "",
@@ -119,9 +114,9 @@
         });
     }
 
-    function getFileBuffer_url(url, name) {
+    function getFileBuffer_url(url, callback) {
         console.log("Downloading " + url);
-        available = false;
+        callback = callback || function(){};
 
         var ends_zip = url.endsWith('.zip');
 
@@ -132,6 +127,7 @@
         xhr.onload = function () {
             if(this.status !== 200) {
                 console.log(this.status);
+                // TODO: handle error with callback
                 return;
             }
 
@@ -139,19 +135,20 @@
             var fileReader = new FileReader();
 
             fileReader.onload = function() {
+                console.log("Downloaded " + url);
                 if(ends_zip){
                     JSZip.loadAsync(this.result).then(function (data) {
-                        bufferList[name] = data;
+                        callback(data);
                     });
                 } else {
-                    bufferList[name] = this.result;
+                    callback(this.result);
                 }
             };
+
             fileReader.readAsArrayBuffer(fileBlob);
-            available = true;
         };
 
-        xhr.onerror = function(){
+        xhr.onerror = function(){item
             console.log(this.status);
             getFileBuffer_url(url,name);
         };
@@ -159,28 +156,19 @@
         xhr.send();
     }
 
-    function getFileBuffer_zip(bufferName, original_name, new_name, path){    
-        if(bufferList[bufferName] == undefined){        
-            setTimeout(function(){ getFileBuffer_zip(bufferName,original_name,new_name,path)},500);
-        } else {
-            if(new_name == undefined || new_name == ""){new_name = original_name};
-            var data =  bufferList[bufferName]    
-                data.file(original_name).async("arraybuffer").then(function success(content){
-                    addFile(content,path,new_name,"buffer");               
-                })                                
-        }
+    function getFileBuffer_zip(data, originalName, newName, path){
+        if(!newName){
+            newName = originalName;
+        };
+
+        data.file(originalName).async("arraybuffer").then(function(content){
+            addFile(content, path, newName);               
+        });
     }
 
-    function extractFolder(bufferName, folder, path){    
-        if(bufferList[bufferName] == undefined){      
-            setTimeout(function(){ extractFolder(bufferName,folder,path)},500);
-            return;
-        }
-
-        var data =  bufferList[bufferName]
+    function extractFolder(data, folder, path){    
         var file_count2 = 0;
-        
-        //Modified from @jkcgs's snippet from extractZip :3
+
         Object.keys(data.files).forEach(function(filename){
             var file = data.files[filename];
             if (file.dir || !filename.startsWith(folder)) {
@@ -190,46 +178,39 @@
             
             file.async("arraybuffer").then(function(content) {
                 file_count2++;
-                addFile(content, path, filename, "buffer");
+                addFile(content, path, filename);
 
                 if(file_count2 == Object.keys(data.files).length){
                     progress_finish(bufferName, bufferName + ": Added to Zip");
-                    
                 }
-                
             });
         });
     }
 
-    function extractZip(bufferName, path, remove_path){
-        if(bufferList[bufferName] == undefined || delete_zip[bufferName] == true) {
-            setTimeout(function(){ 
-                extractZip(bufferName,path,remove_path);
-            }, 500);
-            return;
-        }
+    function extractZip(data, path, removePath){
+        //progress(bufferName, bufferName + ": Extracting");
+        var fileCount = 0;
 
-        var data = bufferList[bufferName]
-        progress(bufferName, bufferName + ": Extracting");
-        var file_count = 0;
-            
-        //Code snippet from @jkcgs :3
         Object.keys(data.files).forEach(function(key){
             var file = data.files[key];
-            var file_name = file.name;
-            if(remove_path != ""){var file_name = (file_name).replace(remove_path + "/","");};
+            var filename = file.name;
+            if(removePath != ""){
+                filename = filename.replace(remove_path + "/", "");
+            };
+
             if (file.dir) {
-                file_count++;
+                fileCount++;
                 return;
             }
 
             file.async("arraybuffer").then(function(content) {
-                file_count++;
-                addFile(content, path, file_name, "buffer");
+                fileCount++;
+                addFile(content, path, filename);
             });             
         });
     }
 
+    // I guess this is not working anymore
     function deletefile_zip(bufferName, filename){
         delete_zip[bufferName] = true;
         if(bufferList[bufferName] == undefined){
@@ -242,27 +223,11 @@
         }
     }
 
-    function addFile(name, path, filename, origin){
-        //origin either "list" or "buffer"
-        
-        var buffer;
-        switch(origin){
-            case "list":
-                buffer = bufferList[name];
-                break;
-            case "buffer":
-                buffer = name;
-                break;
-        }
-        
-        if(buffer == undefined){        
-            setTimeout(function(){ addFile(name,path,filename,origin);},500);
-        } else {                
-            if(path == ""){
-                finalZip.file(filename,buffer);
-            } else {
-                finalZip.folder(path).file(filename,buffer);
-            }
+    function addFile(buffer, path, filename) {
+        if(path === ""){
+            finalZip.file(filename, buffer);
+        } else {
+            finalZip.folder(path).file(filename, buffer);
         }
     }
 
@@ -284,5 +249,25 @@
 
     function corsURL(url) {
         return "https://cors-anywhere.herokuapp.com/" + url;
+    }
+
+    function getGithubAsset(assets, filename) {
+        if(assets === null) {
+            return null;
+        }
+
+        var keys = Object.keys(assets)[0];
+        for(var key in keys) {
+            if(!keys.hasOwnProperty(key)) {
+                continue;
+            }
+
+            var asset = assets[key];
+            if(asset.name.indexOf(filename) > -1){
+                return asset;
+            }
+        }
+
+        return null;
     }
 })(document); // downloader

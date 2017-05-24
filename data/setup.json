@@ -10,7 +10,7 @@
                 "type": "extractFile",
                 "file": ".zip",
                 "fileExtract": "SafeB9SInstaller.bin",
-                "new_name":"start_SafeB9SInstaller.bin",
+                "newName":"start_SafeB9SInstaller.bin",
                 "path": "luma/payloads"
             }
         ]

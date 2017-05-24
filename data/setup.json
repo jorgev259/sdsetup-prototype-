@@ -16,7 +16,7 @@
         
     },
 
-    "luma__": {
+    "luma": {
         "type": "github",
         "repo": "AuroraWright/Luma3DS",
         "version": "latest",
@@ -33,12 +33,45 @@
     "lumaupdater": {
         "type": "github",
         "repo": "KunoichiZ/lumaupdate",
-        "version": "v2.0",
+        "version": "latest",
         "steps": [
             {
                 "type": "addFile",
                 "file": "lumaupdater.cia",
                 "path": "cias"
+            }
+        ]
+    },
+
+    "gm9": {
+        "type": "github",
+        "repo": "d0k3/GodMode9",
+        "steps": [
+            {
+                "type": "extractFile",
+                "file": ".zip",
+                "fileExtract": "GodMode9.firm",
+                "path": "luma/payloads"
+            }
+        ]
+    },
+
+    "b9s": {
+        "type": "github",
+        "repo": "SciresM/boot9strap",
+        "version": "1.0",
+        "steps": [
+            {
+                "type": "extractFile",
+                "file": "boot9strap-1.0.zip",
+                "fileExtract": "boot9strap.firm",
+                "path": "boot9strap"
+            },
+            {
+                "type": "extractFile",
+                "file": "boot9strap-1.0.zip",
+                "fileExtract": "boot9strap.firm.sha",
+                "path": "boot9strap"
             }
         ]
     },

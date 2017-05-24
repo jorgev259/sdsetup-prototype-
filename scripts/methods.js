@@ -58,6 +58,9 @@
             case "extractFile":
                 getFileBuffer_zip(data, step.fileExtract, step.newName, step.path);
                 break;
+            case "addFile":
+                addFile(data, step.path, step.file);
+                break;
             // add more
         }
     }
@@ -67,7 +70,10 @@
         getGithubRelease(item, function(err, info) {
             item.steps.forEach(function(step) {
                 var asset = getGithubAsset(info.assets, step.file);
-                if(asset === null) return;
+                if(asset === null) {
+                    console.log("no asset found for " + step.file);
+                    return;
+                }
 
                 getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
                     evaluateStep(step, data);
@@ -241,11 +247,7 @@
         finalZip.remove(name + "/dummy.txt");
     }
 
-    function rateLimit(jresult) {
-        if (jresult.status !== 403) {
-            return;
-        }
-        
+    function rateLimit() {        
         $.getJSON("http://api.github.com/rate_limit", function(data){
             //var reset = Date(data.rate.reset * 1000);
             rate_limit = data.rate.remaining === 0;
@@ -261,14 +263,12 @@
             return null;
         }
 
-        var keys = Object.keys(assets)[0];
+        var keys = Object.keys(assets);
         for(var key in keys) {
-            if(!keys.hasOwnProperty(key)) {
-                continue;
-            }
+            if(!keys.hasOwnProperty(key)) continue;
 
             var asset = assets[key];
-            if(asset.name.indexOf(filename) > -1){
+            if(asset.name.indexOf(filename) > -1 || asset.name === filename){
                 return asset;
             }
         }

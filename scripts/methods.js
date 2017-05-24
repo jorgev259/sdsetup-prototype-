@@ -87,18 +87,17 @@
         }
 
         var defaults = {
-            author: "",
             repo: "",
             version: "latest"
         };
 
         options = $.extend(defaults, options);
-        if(!options.author || !options.repo) {
-            callback(new Error("Author and repo names required"), null);
+        if(!options.repo) {
+            callback(new Error("Repo name is required"), null);
             return;
         }
 
-        var url = "https://api.github.com/repos/" + options.author + "/" + options.repo + "/releases";
+        var url = "https://api.github.com/repos/" + options.repo + "/releases";
         if(options.version === "latest") {
             url += "/latest";
         } else if(options.version !== "") {
@@ -120,8 +119,6 @@
         console.log("Downloading " + url);
         callback = callback || function(){};
 
-        var ends_zip = url.endsWith('.zip');
-
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url);
         xhr.responseType = "arraybuffer";
@@ -138,7 +135,7 @@
 
             fileReader.onload = function() {
                 console.log("Downloaded " + url);
-                if(ends_zip){
+                if(url.endsWith('.zip')){
                     JSZip.loadAsync(this.result).then(function (data) {
                         callback(data);
                     });
@@ -163,9 +160,15 @@
             newName = originalName;
         };
 
-        data.file(originalName).async("arraybuffer").then(function(content){
-            addFile(content, path, newName);               
-        });
+        try {
+            data.file(originalName).async("arraybuffer").then(function(content){
+                addFile(content, path, newName);               
+            });
+        } catch(e) {
+            console.log("Could not get " + originalName + " from some zip file");
+            console.log(data);
+        }
+        
     }
 
     function extractFolder(data, folder, path){    

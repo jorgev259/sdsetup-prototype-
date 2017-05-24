@@ -1,8 +1,7 @@
 {
     "SafeB9SInstaller_payload": {
         "type": "github",
-        "author": "d0k3",
-        "repo": "SafeB9SInstaller",
+        "repo": "d0k3/SafeB9SInstaller",
         "version": "latest",
         "steps": [
             {
@@ -17,18 +16,29 @@
         
     },
 
-    "luma___": {
+    "luma__": {
         "type": "github",
-        "author": "AuroraWright",
-        "repo": "Luma3DS",
+        "repo": "AuroraWright/Luma3DS",
         "version": "latest",
         "steps": [
             {
-                "name": "luma",
                 "type": "extractFile",
                 "file": ".7z",
                 "fileExtract": "boot.firm",
                 "path": ""
+            }
+        ]
+    },
+
+    "lumaupdater": {
+        "type": "github",
+        "repo": "KunoichiZ/lumaupdate",
+        "version": "v2.0",
+        "steps": [
+            {
+                "type": "addFile",
+                "file": "lumaupdater.cia",
+                "path": "cias"
             }
         ]
     },
@@ -38,7 +48,6 @@
         "url": "https://sugoi.desu.cl/downloads/some_file.bin",
         "steps": [
             {
-                "name": "secret",
                 "type": "copyFile",
                 "path": ""
             }

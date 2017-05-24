@@ -8,13 +8,14 @@
     var available = false;
     var rate_limit = false;
     var waiting = false;
+    var totalSteps = 0;
+    var finishedSteps = 0;
 
     function init() {
         startSetup();
         $('.dl-button').click(function() {
-            if(!waiting) {
+            if(totalSteps > 0 && totalSteps === finishedSteps) {
                 downloadZip();
-                waiting = true;
             }
         });
     }
@@ -36,6 +37,7 @@
             d.querySelectorAll("[data-name]").forEach(function(element) {
                 var itemName = element.dataset.name;
                 if(itemName && list.hasOwnProperty(itemName)) {
+                    totalSteps += list[itemName].steps.length;
                     evaluateItem(list[itemName]);
                 }
             });
@@ -63,6 +65,11 @@
                 break;
             // add more
         }
+
+        finishedSteps++; // kinda
+        if(totalSteps === finishedSteps) {
+            $('.dl-button').text("Download");
+        }
     }
 
     // Prepares files and runs each step passing the downloaded files.
@@ -77,8 +84,6 @@
 
                 getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
                     evaluateStep(step, data);
-                    // stub
-                    available = true;
                 });
             });
         });

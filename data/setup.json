@@ -16,7 +16,7 @@
         
     },
 
-    "luma": {
+    "luma_": {
         "type": "github",
         "repo": "AuroraWright/Luma3DS",
         "version": "latest",

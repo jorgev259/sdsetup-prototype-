@@ -5,12 +5,14 @@
 
     var delete_zip = {};
     var finalZip = new JSZip();
-    var rate_limit = false;
+    var rateLimit = null;
+    var rateLimited = false;
     var totalSteps = 0;
     var finishedSteps = 0;
 
     function init() {
         startSetup();
+        loadRateLimit();
         $('.dl-button').click(function() {
             downloadZip();
         });
@@ -93,7 +95,7 @@
     function getGithubRelease(options, callback) {
         callback = callback || function(){};
 
-        if(rate_limit) {
+        if(rateLimited) {
             callback(new Error("Rate limited lol :p"));
             return;
         }
@@ -123,7 +125,7 @@
 
             callback(null, data);
         }).fail(function(jqXHR) {
-            rateLimit(jqXHR);
+            //rateLimit(jqXHR);
         });
     }
 
@@ -225,19 +227,6 @@
         });
     }
 
-    // I guess this is not working anymore
-    function deletefile_zip(bufferName, filename){
-        delete_zip[bufferName] = true;
-        if(bufferList[bufferName] == undefined){
-            setTimeout(function(){ 
-                deletefile_zip(bufferName,filename)
-            }, 500);
-        } else {  
-            bufferList[bufferName].remove(filename);       
-            delete_zip[bufferName] = false;
-        }
-    }
-
     function addFile(buffer, path, filename) {
         if(path === ""){
             finalZip.file(filename, buffer);
@@ -251,11 +240,32 @@
         finalZip.remove(name + "/dummy.txt");
     }
 
-    function rateLimit() {        
+    function loadRateLimit() {        
         $.getJSON("https://api.github.com/rate_limit", function(data){
-            //var reset = Date(data.rate.reset * 1000);
-            rate_limit = data.rate.remaining === 0;
+            rateLimit = data.resources.core;
+            updateRateLimit();
+            setTimeout(loadRateLimit, 20000);
         });
+    }
+
+    function updateRateLimit() {
+        if(!rateLimit) {
+            loadRateLimit();
+            return;
+        }
+
+        var reset = (new Date(rateLimit.reset * 1000));
+        var now = (new Date()) * 1;
+        var delta = Math.floor((reset - now) / 1000);
+        $('#rl').text("Rate limit: " + delta + " seconds until reset. ")
+            .append(rateLimit.remaining + "/" + rateLimit.limit + " remaining");
+
+        rateLimited = rateLimit.remaining === 0;
+        if(delta <= 0) {
+            loadRateLimit();
+        }
+        
+        setTimeout(updateRateLimit, 500);
     }
 
     function corsURL(url) {

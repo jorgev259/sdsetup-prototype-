@@ -64,14 +64,17 @@
             {
                 "type": "extractFile",
                 "file": "boot9strap-1.0.zip",
-                "fileExtract": "boot9strap.firm",
-                "path": "boot9strap"
-            },
-            {
-                "type": "extractFile",
-                "file": "boot9strap-1.0.zip",
-                "fileExtract": "boot9strap.firm.sha",
-                "path": "boot9strap"
+                "files": [
+                    {
+                        "file": "boot9strap.firm",
+                        "path": "boot9strap"
+                    }, 
+                    {
+                        "file": "boot9strap.firm.sha",
+                        "path": "boot9strap"
+                    }
+                ]
+                
             }
         ]
     },

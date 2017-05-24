@@ -5,24 +5,19 @@
 
     var delete_zip = {};
     var finalZip = new JSZip();
-    var available = false;
     var rate_limit = false;
-    var waiting = false;
     var totalSteps = 0;
     var finishedSteps = 0;
 
     function init() {
         startSetup();
         $('.dl-button').click(function() {
-            if(totalSteps > 0 && totalSteps === finishedSteps) {
-                downloadZip();
-            }
+            downloadZip();
         });
     }
 
     function downloadZip() {
-        if(!available) {
-            setTimeout(downloadZip, 500);
+        if(!totalSteps > 0 && finishedSteps >= totalSteps) {
             return;
         }
 
@@ -58,7 +53,13 @@
     function evaluateStep(step, data) {
         switch(step.type){
             case "extractFile":
-                getFileBuffer_zip(data, step.fileExtract, step.newName, step.path);
+                if(step.fileExtract) {
+                    getFileBuffer_zip(data, step.fileExtract, step.path);
+                } else if(step.files) {
+                    step.files.forEach(function(fileStep) {
+                        getFileBuffer_zip(data, fileStep.file, fileStep.path);
+                    });
+                }
                 break;
             case "addFile":
                 addFile(data, step.path, step.file);
@@ -166,10 +167,8 @@
         xhr.send();
     }
 
-    function getFileBuffer_zip(data, originalName, newName, path){
-        if(!newName){
-            newName = originalName;
-        };
+    function getFileBuffer_zip(data, originalName, path, newName){
+        newName = newName || originalName;
 
         try {
             data.file(originalName).async("arraybuffer").then(function(content){

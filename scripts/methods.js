@@ -71,6 +71,8 @@
 
                 getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
                     evaluateStep(step, data);
+                    // stub
+                    available = true;
                 });
             });
         });

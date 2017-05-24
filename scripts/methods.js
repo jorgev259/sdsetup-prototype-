@@ -275,4 +275,4 @@
 
         return null;
     }
-})(document); // downloader
+})(document);

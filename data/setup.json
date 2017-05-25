@@ -1,0 +1,92 @@
+{
+    "SafeB9SInstaller_payload": {
+        "type": "github",
+        "repo": "d0k3/SafeB9SInstaller",
+        "version": "latest",
+        "steps": [
+            {
+                "name": "safeb9sinstaller",
+                "type": "extractFile",
+                "file": ".zip",
+                "fileExtract": "SafeB9SInstaller.bin",
+                "newName":"start_SafeB9SInstaller.bin",
+                "path": "luma/payloads"
+            }
+        ]
+        
+    },
+
+    "luma_": {
+        "type": "github",
+        "repo": "AuroraWright/Luma3DS",
+        "version": "latest",
+        "steps": [
+            {
+                "type": "extractFile",
+                "file": ".7z",
+                "fileExtract": "boot.firm",
+                "path": ""
+            }
+        ]
+    },
+
+    "lumaupdater": {
+        "type": "github",
+        "repo": "KunoichiZ/lumaupdate",
+        "version": "latest",
+        "steps": [
+            {
+                "type": "addFile",
+                "file": "lumaupdater.cia",
+                "path": "cias"
+            }
+        ]
+    },
+
+    "gm9": {
+        "type": "github",
+        "repo": "d0k3/GodMode9",
+        "steps": [
+            {
+                "type": "extractFile",
+                "file": ".zip",
+                "fileExtract": "GodMode9.firm",
+                "path": "luma/payloads"
+            }
+        ]
+    },
+
+    "b9s": {
+        "type": "github",
+        "repo": "SciresM/boot9strap",
+        "version": "1.0",
+        "steps": [
+            {
+                "type": "extractFile",
+                "file": "boot9strap-1.0.zip",
+                "files": [
+                    {
+                        "file": "boot9strap.firm",
+                        "path": "boot9strap"
+                    }, 
+                    {
+                        "file": "boot9strap.firm.sha",
+                        "path": "boot9strap"
+                    }
+                ]
+                
+            }
+        ]
+    },
+
+    "stuff": {
+        "type": "direct",
+        "url": "https://sugoi.desu.cl/downloads/some_file.bin",
+        "steps": [
+            {
+                "type": "copyFile",
+                "path": ""
+            }
+        ]
+    }
+}

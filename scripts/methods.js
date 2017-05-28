@@ -278,6 +278,10 @@
     }
 
     function updateRateLimit(noTimeout) {
+        if(typeof noTimeout === "undefined") {
+            noTimeout = false;
+        }
+        
         if(!rateLimit) {
             loadRateLimit();
             return;

@@ -81,10 +81,11 @@
 
     "stuff": {
         "type": "direct",
-        "url": "https://sugoi.desu.cl/downloads/some_file.bin",
+        "url": "https://archive.org/download/testmp3testfile/testmp3testfile_64kb.m3u",
         "steps": [
             {
-                "type": "copyFile",
+                "type": "addFile",
+                "file": "testmp3testfile_64kb.m3u",
                 "path": ""
             }
         ]

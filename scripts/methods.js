@@ -46,7 +46,7 @@
                 runGithub(item);
                 break;
             case "direct":
-                // lel
+                runDirect(item);
                 break;
         }
     }
@@ -62,6 +62,7 @@
                     });
                 }
                 break;
+                
             case "addFile":
                 addFile(data, step.path, step.file);
                 break;
@@ -87,6 +88,14 @@
                 getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
                     evaluateStep(step, data);
                 });
+            });
+        });
+    }
+    
+    function runDirect(item) {
+        getFileBuffer_url(corsURL(item.url), function(data) {
+            item.steps.forEach(function(step) {
+                evaluateStep(step, data);
             });
         });
     }

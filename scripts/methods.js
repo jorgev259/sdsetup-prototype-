@@ -60,11 +60,27 @@
                     step.files.forEach(function(fileStep) {
                         getFileBuffer_zip(data, fileStep.file, fileStep.path);
                     });
+                }else{
+ -                    extractZip(data,step.path,step.remove_path);
                 }
                 break;
                 
             case "addFile":
                 addFile(data, step.path, step.file);
+                break;
+                
+            case "deleteFile":
+                if(step.fileDelete) {
+                    deletefile_zip(data,step.file);
+                } else if(step.files) {
+                    step.files.forEach(function(fileStep) {
+                        deletefile_zip(data,fileStep.file);
+                    });
+                }
+                break;
+                
+            case "folder":
+                folder(step.name);
                 break;
             // add more
         }
@@ -220,7 +236,7 @@
             var file = data.files[key];
             var filename = file.name;
             if(removePath != ""){
-                filename = filename.replace(remove_path + "/", "");
+                filename = filename.replace(removePath + "/", "");
             };
 
             if (file.dir) {
@@ -243,8 +259,8 @@
         }
     }
     
-    function deletefile_zip(bufferName, filename){
-            bufferList[bufferName].remove(filename);       
+    function deletefile_zip(data, filename){
+            data.remove(filename);       
     }
 
     function folder(name){

@@ -87,6 +87,22 @@
                 "type": "addFile",
                 "file": "testmp3testfile_64kb.m3u",
                 "path": ""
+            },
+            {
+                "type":"folder",
+                "name":"testFolder"
+            }
+        ]
+    },
+    
+    "homebrew":{
+        "type" :"direct",
+        "url":"https://smealum.github.io/ninjhax2/starter.zip",
+        "steps":[
+            {
+                "type":"extractFile",
+                "path":"",
+                "removePath":"starter"
             }
         ]
     }

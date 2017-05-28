@@ -70,7 +70,7 @@
                 break;
                 
             case "deleteFile":
-                if(step.fileDelete) {
+                if(step.file) {
                     deletefile_zip(data,step.file);
                 } else if(step.files) {
                     step.files.forEach(function(fileStep) {

@@ -100,10 +100,15 @@
         "url":"https://smealum.github.io/ninjhax2/starter.zip",
         "steps":[
             {
+                "type":"deleteFile",
+                "file":"starter/boot.3dsx"
+            },
+            {
                 "type":"extractFile",
                 "path":"",
                 "removePath":"starter"
             }
+            
         ]
     }
 }

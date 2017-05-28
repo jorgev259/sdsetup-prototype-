@@ -48,6 +48,9 @@
             case "direct":
                 runDirect(item);
                 break;
+            case "notDownload":
+                evaluateStep(item);
+                break;
         }
     }
 
@@ -60,15 +63,26 @@
                     step.files.forEach(function(fileStep) {
                         getFileBuffer_zip(data, fileStep.file, fileStep.path);
                     });
+                }else{
+                    extractZip(data,step.path,step.remove_path);
                 }
                 break;
                 
             case "addFile":
                 addFile(data, step.path, step.file);
                 break;
+                
+            case "folder":
+                folder(step.name);
+                break;
+                
+            case "deleteZip":
+                deletefile_zip(step.file,data);
+                break;
             // add more
         }
-
+        console.log(finishedSteps);
+        console.log(totalSteps);
         finishedSteps++; // kinda
         if(totalSteps === finishedSteps) {
             $('.dl-button').text("Download");
@@ -243,8 +257,8 @@
         }
     }
     
-    function deletefile_zip(bufferName, filename){
-            bufferList[bufferName].remove(filename);       
+    function deletefile_zip(data, filename){
+            data.remove(filename);       
     }
 
     function folder(name){

@@ -89,5 +89,15 @@
                 "path": ""
             }
         ]
+    },
+    
+    "testFolder":{
+        "type": "notDownload",
+        "steps":[
+            {
+                "type":"folder",
+                "name":"magicFolder",
+            }
+        ]
     }
 }

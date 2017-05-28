@@ -11,7 +11,7 @@
 
     function init() {
         startSetup();
-        loadRateLimit();
+        updateRateLimit();
         $('.dl-button').click(function() {
             downloadZip();
         });
@@ -281,7 +281,7 @@
         if(typeof noTimeout === "undefined") {
             noTimeout = false;
         }
-        
+
         if(!rateLimit) {
             loadRateLimit();
             return;

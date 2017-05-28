@@ -60,8 +60,8 @@
                     step.files.forEach(function(fileStep) {
                         getFileBuffer_zip(data, fileStep.file, fileStep.path);
                     });
-                }else{
- -                    extractZip(data,step.path,step.remove_path);
+                } else {
+                    extractZip(data, step.path, step.remove_path);
                 }
                 break;
                 
@@ -74,9 +74,10 @@
                     deletefile_zip(data,step.file);
                 } else if(step.files) {
                     step.files.forEach(function(fileStep) {
-                        deletefile_zip(data,fileStep.file);
+                        deletefile_zip(data, fileStep.file);
                     });
                 }
+
                 break;
                 
             case "folder":
@@ -185,7 +186,7 @@
             fileReader.readAsArrayBuffer(fileBlob);
         };
 
-        xhr.onerror = function(){item
+        xhr.onerror = function(){
             console.log(this.status);
             getFileBuffer_url(url,name);
         };
@@ -260,7 +261,7 @@
     }
     
     function deletefile_zip(data, filename){
-            data.remove(filename);       
+        data.remove(filename);
     }
 
     function folder(name){
@@ -271,12 +272,12 @@
     function loadRateLimit() {        
         $.getJSON("https://api.github.com/rate_limit", function(data){
             rateLimit = data.resources.core;
-            updateRateLimit();
+            updateRateLimit(true);
             setTimeout(loadRateLimit, 20000);
         });
     }
 
-    function updateRateLimit() {
+    function updateRateLimit(noTimeout) {
         if(!rateLimit) {
             loadRateLimit();
             return;
@@ -293,7 +294,9 @@
             loadRateLimit();
         }
         
-        setTimeout(updateRateLimit, 500);
+        if(!noTimeout) {
+            setTimeout(updateRateLimit, 500);
+        }
     }
 
     function corsURL(url) {

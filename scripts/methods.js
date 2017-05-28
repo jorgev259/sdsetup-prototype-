@@ -3,7 +3,6 @@
 
     //////////////////////
 
-    var delete_zip = {};
     var finalZip = new JSZip();
     var rateLimit = null;
     var rateLimited = false;
@@ -233,6 +232,10 @@
         } else {
             finalZip.folder(path).file(filename, buffer);
         }
+    }
+    
+    function deletefile_zip(bufferName, filename){
+            bufferList[bufferName].remove(filename);       
     }
 
     function folder(name){

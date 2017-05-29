@@ -2,7 +2,7 @@
     init(); // more magic
 
     //////////////////////
-
+    var parent = document.getElementById("parent");
     var finalZip = new JSZip();
     var rateLimit = null;
     var rateLimited = false;
@@ -30,7 +30,7 @@
 
     function startSetup(data) {
         $.get("data/setup.json", function(list) {
-            d.querySelectorAll("[data-name]").forEach(function(element) {
+            parent.querySelectorAll("[data-name]").forEach(function(element) {
                 var itemName = element.dataset.name;
                 if(itemName && list.hasOwnProperty(itemName)) {
                     totalSteps += list[itemName].steps.length;

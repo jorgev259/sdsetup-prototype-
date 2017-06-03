@@ -34,6 +34,7 @@
                 var itemName = element.dataset.name;
                 if(itemName && list.hasOwnProperty(itemName)) {
                     totalSteps += list[itemName].steps.length;
+                    element.innerHTML += "  <b></b>";
                     evaluateItem(list[itemName], element);
                 }
             });

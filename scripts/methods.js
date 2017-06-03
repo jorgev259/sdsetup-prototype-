@@ -34,24 +34,24 @@
                 var itemName = element.dataset.name;
                 if(itemName && list.hasOwnProperty(itemName)) {
                     totalSteps += list[itemName].steps.length;
-                    evaluateItem(list[itemName]);
+                    evaluateItem(list[itemName], element);
                 }
             });
         });
     }
 
-    function evaluateItem(item) {
+    function evaluateItem(item, element) {
         switch(item.type) {
             case "github":
-                runGithub(item);
+                runGithub(item, element);
                 break;
             case "direct":
-                runDirect(item);
+                runDirect(item, element);
                 break;
         }
     }
 
-    function evaluateStep(step, data) {
+    function evaluateStep(step, data, element) {
         switch(step.type){
             case "extractFile":
                 if(step.fileExtract) {
@@ -90,10 +90,12 @@
         if(totalSteps === finishedSteps) {
             $('.dl-button').text("Download");
         }
+
+        element.childNodes[element.childNodes.length -1].innerText = "(Added!)";
     }
 
     // Prepares files and runs each step passing the downloaded files.
-    function runGithub(item) {
+    function runGithub(item, element) {
         getGithubRelease(item, function(err, info) {
             item.steps.forEach(function(step) {
                 var asset = getGithubAsset(info.assets, step.file);
@@ -102,17 +104,17 @@
                     return;
                 }
 
-                getFileBuffer_url(corsURL(asset.browser_download_url), function(data) {
-                    evaluateStep(step, data);
+                getFileBuffer_url(corsURL(asset.browser_download_url), element, function(data) {
+                    evaluateStep(step, data, element);
                 });
             });
         });
     }
     
-    function runDirect(item) {
-        getFileBuffer_url(corsURL(item.url), function(data) {
+    function runDirect(item, element) {
+        getFileBuffer_url(corsURL(item.url), element, function(data) {
             item.steps.forEach(function(step) {
-                evaluateStep(step, data);
+                evaluateStep(step, data, element);
             });
         });
     }
@@ -154,7 +156,7 @@
         });
     }
 
-    function getFileBuffer_url(url, callback) {
+    function getFileBuffer_url(url, element, callback) {
         console.log("Downloading " + url);
         callback = callback || function(){};
 
@@ -184,6 +186,13 @@
             };
 
             fileReader.readAsArrayBuffer(fileBlob);
+        };
+
+        xhr.onprogress = function (e) {
+        if (e.lengthComputable) {
+            var percent = Math.floor((e.loaded / e.total) * 100);
+            element.childNodes[element.childNodes.length -1].innerText = "(" + percent + ")";
+        }
         };
 
         xhr.onerror = function(){
